@@ -45,10 +45,12 @@ public class App {
 		List<Candidate> obywateleDoParlamentuCandidates = ds
 				.getFilteredCandidates(c -> c.getListNumber().equals(Lists.ObywateleDoParlamentu) && c.isFemale());
 
-		for (Candidate candidate : obywateleDoParlamentuCandidates) {
-			System.out.println(candidate);
+		int i =0;
+		for (Candidate candidate : pisCandidates) {
+			i++;
+			System.out.println(i+ ". " +candidate);
 		}
-		System.out.println("\nIlość kandydatek z danej listy: " + obywateleDoParlamentuCandidates.size());
+		System.out.println("\nIlość kandydatek z danej listy: " + pisCandidates.size());
 
 	}
 }
