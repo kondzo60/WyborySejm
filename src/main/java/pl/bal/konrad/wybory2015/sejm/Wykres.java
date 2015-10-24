@@ -1,6 +1,7 @@
 package pl.bal.konrad.wybory2015.sejm;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.util.List;
 import java.util.Scanner;
 
@@ -12,6 +13,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.BarRenderer;
@@ -26,49 +28,56 @@ public class Wykres {
 	public static final String KOBIETY = "Kobiety";
 	public static final String MEZCZYZNI = "Mężczyźni";
 	public static final String CHART_NAME = "Wykres obrazujący ilość kobiet oraz mężczyzn startujących z określonej listy do Wyborów 2015";
+	public static final DataSource ds = new DataSource("sejm.csv");
+	
 
 	private CategoryDataset createCategoryDataset() {
 		final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+		
+		long femaleCount = ds.countFilteredCandidates(Candidate::isFemale);
+        long maleCount = ds.countFilteredCandidates(Candidate::isMale);
 
 		for (int i = Lists.PiS; i <= Lists.ObywateleDoParlamentu; i++) {
 			List<Candidate> candidateK = null;
 			candidateK = pobierzKandydatow(i, false);
 			Candidate kandydatK = candidateK.get(0);
 			String partyNameK = kandydatK.getListName();
-			dataset.addValue(candidateK.size(), partyNameK, KOBIETY);
+			dataset.addValue(candidateK.size(), partyNameK, KOBIETY + " (" + femaleCount +")");
 
 			List<Candidate> candidateM = null;
 			candidateM = pobierzKandydatow(i, true);
 			Candidate kandydatM = candidateM.get(0);
 			String partyNameM = kandydatM.getListName();
-			dataset.addValue(candidateM.size(), partyNameM, MEZCZYZNI);
+			dataset.addValue(candidateM.size(), partyNameM, MEZCZYZNI + " (" + maleCount +")");
 		}
-
 		return dataset;
 	}
 
 	private List<Candidate> pobierzKandydatow(Integer lista, boolean czyMezczyzna) {
-		DataSource ds = new DataSource("sejm.csv");
 		List<Candidate> candidates = ds
 				.getFilteredCandidates(c -> c.getListNumber().equals(lista) && c.isMale() == czyMezczyzna);
 		return candidates;
 	}
 
 	private JFreeChart create3DBarChart(CategoryDataset dataset, PlotOrientation plotOrientation) {
-		JFreeChart chart = ChartFactory.createBarChart3D(CHART_NAME, // Chart
-																		// Title
-				"Płeć", // Domain Axis Label
-				"Ilość", // Range Axis Label
+		
+		long iloscKandydatow = getCountallCandidates();
+
+		JFreeChart chart = ChartFactory.createBarChart3D(CHART_NAME, // ChartTitle
+				null,
+				"Liczba kandydatów ("+iloscKandydatow+")", // Range Axis Label
 				dataset, // Data
 				plotOrientation, // Orientation
 				true, // Include Legend
 				true, // Tooltips
-				false // Urls
+				false // Url
 		);
 
 		CategoryPlot plot = chart.getCategoryPlot();
 		CategoryAxis axis = plot.getDomainAxis();
-		axis.setCategoryLabelPositions(CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 6.0));
+		final NumberAxis domainAxis = new NumberAxis();
+		domainAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+		axis.setTickLabelFont(new Font("Arial", Font.BOLD, 20));
 
 		CategoryItemRenderer renderer = plot.getRenderer();
 		BarRenderer r = (BarRenderer) renderer;
@@ -76,7 +85,13 @@ public class Wykres {
 		chart.setBackgroundPaint(Color.WHITE);
 
 		return chart;
-
+	}
+	
+	private long getCountallCandidates(){
+		long femaleCount = ds.countFilteredCandidates(Candidate::isFemale);
+        long maleCount = ds.countFilteredCandidates(Candidate::isMale);
+		
+		return femaleCount + maleCount;
 	}
 
 	public static void main(String[] args) {
@@ -114,7 +129,6 @@ public class Wykres {
 	}
 
 	private static void wyswietlKandydatowDanejListy(int listNumber) {
-		DataSource ds = new DataSource("sejm.csv");
 		List<Candidate> candidates = ds.getFilteredCandidates(c -> c.getListNumber().equals(listNumber));
 		int number = 0;
 		for (Candidate candidate : candidates) {
@@ -133,9 +147,8 @@ public class Wykres {
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				JFrame frame = new JFrame("Wykres - Wybory do Sejmu 2015 - Konrad Bal");
+				JFrame frame = new JFrame("Wybory do Sejmu 2015 - Konrad Bal");
 
-				frame.setSize(1000, 800);
 				frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				frame.setVisible(true);
