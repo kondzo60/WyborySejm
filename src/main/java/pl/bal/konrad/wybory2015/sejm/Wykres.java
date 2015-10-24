@@ -12,7 +12,6 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
-import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
@@ -28,12 +27,12 @@ public class Wykres {
 	public static final String KOBIETY = "Kobiety";
 	public static final String MEZCZYZNI = "Mężczyźni";
 	public static final String CHART_NAME = "Wykres obrazujący ilość kobiet oraz mężczyzn startujących z określonej listy do Wyborów 2015";
-	public static final DataSource ds = new DataSource("sejm.csv");
+
 	
 
 	private CategoryDataset createCategoryDataset() {
 		final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-		
+		DataSource ds = new DataSource("sejm.csv");
 		long femaleCount = ds.countFilteredCandidates(Candidate::isFemale);
         long maleCount = ds.countFilteredCandidates(Candidate::isMale);
 
@@ -41,19 +40,20 @@ public class Wykres {
 			List<Candidate> candidateK = null;
 			candidateK = pobierzKandydatow(i, false);
 			Candidate kandydatK = candidateK.get(0);
-			String partyNameK = kandydatK.getListName();
+			String partyNameK = kandydatK.getListName().replaceAll("Komitet Wyborczy","").replaceAll("Wyborców","");//ladniejsze opisy
 			dataset.addValue(candidateK.size(), partyNameK, KOBIETY + " (" + femaleCount +")");
 
 			List<Candidate> candidateM = null;
 			candidateM = pobierzKandydatow(i, true);
 			Candidate kandydatM = candidateM.get(0);
-			String partyNameM = kandydatM.getListName();
+			String partyNameM = kandydatM.getListName().replaceAll("Komitet Wyborczy","").replaceAll("Wyborców","");//ladniejsze opisy
 			dataset.addValue(candidateM.size(), partyNameM, MEZCZYZNI + " (" + maleCount +")");
 		}
 		return dataset;
 	}
 
 	private List<Candidate> pobierzKandydatow(Integer lista, boolean czyMezczyzna) {
+		DataSource ds = new DataSource("sejm.csv");
 		List<Candidate> candidates = ds
 				.getFilteredCandidates(c -> c.getListNumber().equals(lista) && c.isMale() == czyMezczyzna);
 		return candidates;
@@ -88,6 +88,7 @@ public class Wykres {
 	}
 	
 	private long getCountallCandidates(){
+		DataSource ds = new DataSource("sejm.csv");
 		long femaleCount = ds.countFilteredCandidates(Candidate::isFemale);
         long maleCount = ds.countFilteredCandidates(Candidate::isMale);
 		
@@ -129,6 +130,7 @@ public class Wykres {
 	}
 
 	private static void wyswietlKandydatowDanejListy(int listNumber) {
+		DataSource ds = new DataSource("sejm.csv");
 		List<Candidate> candidates = ds.getFilteredCandidates(c -> c.getListNumber().equals(listNumber));
 		int number = 0;
 		for (Candidate candidate : candidates) {
