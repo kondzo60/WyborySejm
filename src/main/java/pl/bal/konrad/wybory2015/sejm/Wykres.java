@@ -1,6 +1,8 @@
 package pl.bal.konrad.wybory2015.sejm;
 
 import java.awt.Color;
+import java.util.List;
+import java.util.Scanner;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -17,36 +19,43 @@ import org.jfree.chart.renderer.category.CategoryItemRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
+import pl.bal.konrad.wybory2015.sejm.model.Candidate;
+import pl.bal.konrad.wybory2015.sejm.model.Lists;
+
 public class Wykres {
+	public static final String KOBIETY = "Kobiety";
+	public static final String MEZCZYZNI = "Mężczyźni";
+	public static final String CHART_NAME = "Wykres obrazujący ilość kobiet oraz mężczyzn startujących z określonej listy do Wyborów 2015";
 
 	private CategoryDataset createCategoryDataset() {
 		final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-		dataset.addValue(225, "15 Years", "Faceci");
-		dataset.addValue(419, "20 Years", "Faceci");
-		dataset.addValue(141, "30 Years", "Faceci");
-		dataset.addValue(14, "50 Years", "Faceci");
-		dataset.addValue(225, "55 Years", "Faceci");
-		dataset.addValue(419, "203 Years", "Faceci");
-		dataset.addValue(141, "304 Years", "Faceci");
-		dataset.addValue(142, "506 Years", "Faceci");
-		dataset.addValue(225, "152 Years", "Faceci");
-		dataset.addValue(419, "2030 Years", "Faceci");
-		dataset.addValue(141, "3040 Years", "Faceci");
-		dataset.addValue(142, "5060 Years", "Faceci");
-		dataset.addValue(225, "1520 Years", "Faceci");
-		dataset.addValue(419, "2031 Years", "Faceci");
-		dataset.addValue(141, "3041 Years", "Faceci");
-		dataset.addValue(142, "5061 Years", "Faceci");
 
-		dataset.addValue(634.0, "15-20 Years", "Kobiety");
-		dataset.addValue(229.0, "20-30 Years", "Kobiety");
-		dataset.addValue(433.0, "30-40 Years", "Kobiety");
+		for (int i = Lists.PiS; i <= Lists.ObywateleDoParlamentu; i++) {
+			List<Candidate> candidateK = null;
+			candidateK = pobierzKandydatow(i, false);
+			Candidate kandydatK = candidateK.get(0);
+			String partyNameK = kandydatK.getListName();
+			dataset.addValue(candidateK.size(), partyNameK, KOBIETY);
+
+			List<Candidate> candidateM = null;
+			candidateM = pobierzKandydatow(i, true);
+			Candidate kandydatM = candidateM.get(0);
+			String partyNameM = kandydatM.getListName();
+			dataset.addValue(candidateM.size(), partyNameM, MEZCZYZNI);
+		}
+
 		return dataset;
+	}
 
+	private List<Candidate> pobierzKandydatow(Integer lista, boolean czyMezczyzna) {
+		DataSource ds = new DataSource("sejm.csv");
+		List<Candidate> candidates = ds
+				.getFilteredCandidates(c -> c.getListNumber().equals(lista) && c.isMale() == czyMezczyzna);
+		return candidates;
 	}
 
 	private JFreeChart create3DBarChart(CategoryDataset dataset, PlotOrientation plotOrientation) {
-		JFreeChart chart = ChartFactory.createBarChart3D("Wykres test", // Chart
+		JFreeChart chart = ChartFactory.createBarChart3D(CHART_NAME, // Chart
 																		// Title
 				"Płeć", // Domain Axis Label
 				"Ilość", // Range Axis Label
@@ -59,7 +68,7 @@ public class Wykres {
 
 		CategoryPlot plot = chart.getCategoryPlot();
 		CategoryAxis axis = plot.getDomainAxis();
-		axis.setCategoryLabelPositions(CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 16.0));
+		axis.setCategoryLabelPositions(CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 6.0));
 
 		CategoryItemRenderer renderer = plot.getRenderer();
 		BarRenderer r = (BarRenderer) renderer;
@@ -71,6 +80,61 @@ public class Wykres {
 	}
 
 	public static void main(String[] args) {
+
+		Scanner in = new Scanner(System.in);
+		int digit, listNumber;
+		do {
+			System.out.println("Co chcesz zrobić?");
+			System.out.println("Wyzerowac - [1]");
+			System.out.println("Wyświetlić wykres - [2]");
+			System.out.println("Wyświetlić kandydatów danej listy - [3]");
+			System.out.println("Zakończyć - [4]");
+
+			digit = in.nextInt();
+
+			switch (digit) {
+			case 1:
+				zerujLosowaListe();
+				break;
+			case 2:
+				wyswietlWykres();
+				break;
+			case 3:
+				System.out.println("Podaj numer listy do wyświetlenia");
+				listNumber = in.nextInt();
+
+				if (!(listNumber < 1 || listNumber > 17)) {
+					wyswietlKandydatowzDanejListy(listNumber);
+				} else {
+					System.out.println("Podaj numer listy do wyświetlenia");
+					listNumber = in.nextInt();
+					wyswietlKandydatowzDanejListy(listNumber);
+				}
+				break;
+			default:
+				break;
+			}
+		} while (digit != 4);
+	}
+
+	private static void wyswietlKandydatowzDanejListy(int listNumber) {
+		DataSource ds = new DataSource("sejm.csv");
+		List<Candidate> candidates = ds.getFilteredCandidates(c -> c.getListNumber().equals(listNumber));
+		int number = 0;
+		for (Candidate candidate : candidates) {
+			number++;
+			System.out.println(number + ". " + candidate);
+		}
+		System.out.println();
+
+	}
+
+	private static void zerujLosowaListe() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private static void wyswietlWykres() {
 		Wykres chartCreator = new Wykres();
 
 		CategoryDataset categoryDataset = chartCreator.createCategoryDataset();
@@ -78,11 +142,13 @@ public class Wykres {
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				JFrame frame = new JFrame("Wykres - Konrad Bal");
+				JFrame frame = new JFrame("Wykres SEJM 2015 - Konrad Bal");
 
-				frame.setSize(800, 600);
+				frame.setSize(1000, 800);
+				frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				frame.setVisible(true);
+
 				ChartPanel cp = new ChartPanel(chartVertical);
 				frame.getContentPane().add(cp);
 			}

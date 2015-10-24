@@ -15,7 +15,7 @@ public class DataSource {
 	private List<Candidate> candidatesList;
 
 	public DataSource(String filename) {
-		ClassLoader classLoader = App.class.getClassLoader();
+		ClassLoader classLoader = Wykres.class.getClassLoader();
 		InputStream sejm = classLoader.getResourceAsStream(filename);
 		BufferedReader br = new BufferedReader(new InputStreamReader(sejm));
 		Stream<Candidate> candidates = br.lines().map(Candidate::new);
