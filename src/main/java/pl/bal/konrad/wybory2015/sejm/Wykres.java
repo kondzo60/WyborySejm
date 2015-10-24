@@ -80,44 +80,40 @@ public class Wykres {
 	}
 
 	public static void main(String[] args) {
-
 		Scanner in = new Scanner(System.in);
 		int digit, listNumber;
 		do {
 			System.out.println("Co chcesz zrobić?");
-			System.out.println("Wyzerowac - [1]");
-			System.out.println("Wyświetlić wykres - [2]");
-			System.out.println("Wyświetlić kandydatów danej listy - [3]");
-			System.out.println("Zakończyć - [4]");
+			System.out.println("Wyświetlić wykres - wpisz: 1");
+			System.out.println("Wyświetlić kandydatów danej listy - wpisz: 2");
+			System.out.println("Zakończyć - wpisz: 3");
 
 			digit = in.nextInt();
 
 			switch (digit) {
 			case 1:
-				zerujLosowaListe();
-				break;
-			case 2:
 				wyswietlWykres();
 				break;
-			case 3:
+			case 2:
 				System.out.println("Podaj numer listy do wyświetlenia");
 				listNumber = in.nextInt();
 
-				if (!(listNumber < 1 || listNumber > 17)) {
-					wyswietlKandydatowzDanejListy(listNumber);
+				if (!(listNumber < Lists.PiS || listNumber > Lists.ObywateleDoParlamentu)) {
+					wyswietlKandydatowDanejListy(listNumber);
 				} else {
 					System.out.println("Podaj numer listy do wyświetlenia");
 					listNumber = in.nextInt();
-					wyswietlKandydatowzDanejListy(listNumber);
+					wyswietlKandydatowDanejListy(listNumber);
 				}
 				break;
 			default:
 				break;
 			}
-		} while (digit != 4);
+		} while (digit != 3);
+		in.close();
 	}
 
-	private static void wyswietlKandydatowzDanejListy(int listNumber) {
+	private static void wyswietlKandydatowDanejListy(int listNumber) {
 		DataSource ds = new DataSource("sejm.csv");
 		List<Candidate> candidates = ds.getFilteredCandidates(c -> c.getListNumber().equals(listNumber));
 		int number = 0;
@@ -129,11 +125,6 @@ public class Wykres {
 
 	}
 
-	private static void zerujLosowaListe() {
-		// TODO Auto-generated method stub
-
-	}
-
 	private static void wyswietlWykres() {
 		Wykres chartCreator = new Wykres();
 
@@ -142,7 +133,7 @@ public class Wykres {
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				JFrame frame = new JFrame("Wykres SEJM 2015 - Konrad Bal");
+				JFrame frame = new JFrame("Wykres - Wybory do Sejmu 2015 - Konrad Bal");
 
 				frame.setSize(1000, 800);
 				frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
