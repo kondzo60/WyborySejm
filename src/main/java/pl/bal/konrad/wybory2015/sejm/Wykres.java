@@ -26,10 +26,9 @@ import pl.bal.konrad.wybory2015.sejm.model.Lists;
 public class Wykres {
 	public static final String KOBIETY = "Kobiety";
 	public static final String MEZCZYZNI = "Mężczyźni";
-	public static final String CHART_NAME = "Wykres obrazujący ilość kobiet oraz mężczyzn startujących z określonej listy do Wyborów 2015";
+	public static final String CHART_NAME = "Ilość kobiet i mężczyzn startujących w Wyborach do Sejmu 2015";
 
 	
-
 	private CategoryDataset createCategoryDataset() {
 		final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 		DataSource ds = new DataSource("sejm.csv");
